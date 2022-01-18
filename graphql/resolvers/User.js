@@ -3,20 +3,38 @@ const bcryptjs = require("bcryptjs");
 const jsonwebtoken = require("jsonwebtoken");
 const { SECRET_KEY } = require("../../config");
 const User = require("../../models/User");
+const { validateRegisterInput } = require("../../utils/validators");
 
 module.exports = {
   Mutation: {
     async register(
       _,
-      { registerInput: { username, email, password, confirmPassword } },
-      __,
-      ___
+      { registerInput: { username, email, password, confirmPassword } }
     ) {
-      const user = await User.findOne({ username });
-      if (user) {
+      const { errors, valid } = validateRegisterInput(
+        username,
+        email,
+        password,
+        confirmPassword
+      );
+
+      if (!valid) {
+        throw new UserInputError("Errors", { errors });
+      }
+
+      const userCheck = await User.findOne({ username });
+      if (userCheck) {
         throw new UserInputError("Username is taken", {
           errors: {
             username: "This username is taken",
+          },
+        });
+      }
+      const emailCheck = await User.findOne({ email });
+      if (emailCheck) {
+        throw new UserInputError("Email already Exist", {
+          errors: {
+            email: "This Email is exist",
           },
         });
       }
