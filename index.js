@@ -1,39 +1,42 @@
 const { ApolloServer, gql } = require("apollo-server");
 const mongoose = require("mongoose");
+
 const { MONGODB } = require("./config");
+const Post = require("./models/Post");
 
 const typeDefs = gql`
-  type Book {
-    title: String
-    author: String
+  type Post {
+    id: ID!
+    body: String!
+    createdAt: String!
+    username: String!
   }
 
   type Query {
-    books: [Book]
+    getPosts: [Post]
   }
 `;
 
 const resolvers = {
   Query: {
-    books: () => books,
+    getPosts: async () => {
+      try {
+        const posts = await Post.find();
+        return posts;
+      } catch (error) {
+        throw new Error(err);
+      }
+    },
   },
 };
-const books = [
-  {
-    title: "The Awakening!!!!!!!!!!",
-    author: "Kate Chopin",
-  },
-  {
-    title: "City of Glass",
-    author: "Paul Auster",
-  },
-];
 
 const server = new ApolloServer({ typeDefs, resolvers });
 
-mongoose.connect(MONGODB, { useNewUrlParser: true }).then(() => {
-  console.log("mongo db connected");
-  return server.listen({ port: 5000 }).then(({ url }) => {
-    console.log(`🚀  Server ready at ${url}`);
+mongoose
+  .connect(MONGODB, { useUnifiedTopology: true, useNewUrlParser: true })
+  .then(() => {
+    console.log("mongo db connected");
+    return server.listen({ port: 4000 }).then(({ url }) => {
+      console.log(`🚀  Server ready at ${url}`);
+    });
   });
-});
