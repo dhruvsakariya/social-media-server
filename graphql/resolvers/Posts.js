@@ -53,7 +53,7 @@ module.exports = {
           throw new AuthenticationError("Action not allowed");
         }
       } catch (error) {
-        throw new Error(err);
+        throw new Error(error);
       }
     },
     likePost: async (_, { postId }, context) => {
